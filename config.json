@@ -30,9 +30,9 @@
             "path_depths":"Depth/Depth/Depth"
         },
         "extensions":{
-            "ext_images":".jpg",
+            "ext_images":".png",
             "ext_segmentations":".png",
-            "ext_depths":".jpg"
+            "ext_depths":".png"
         },
         "splits":{
             "split_train":0.6,
