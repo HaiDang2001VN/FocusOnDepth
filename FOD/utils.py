@@ -97,18 +97,26 @@ def get_optimizer(config, net):
 def get_schedulers(optimizers):
     return [ReduceLROnPlateau(optimizer) for optimizer in optimizers]
 
-
-def compute_errors_NYU(gt, pred, crop=True):
+def sH(x):
     SIZE = 384
     _h = SIZE/480
     _w = SIZE/640
+    return np.floor(x * _h)
+def sW(x):
+    SIZE = 384
+    _h = SIZE/480
+    _w = SIZE/640
+    return np.floor(x * _w)
+
+def compute_errors_NYU(gt, pred, crop=True):
+    
     abs_diff, abs_rel, log10, a1, a2, a3,rmse_tot,rmse_log_tot = 0,0,0,0,0,0,0,0
     batch_size = gt.size(0)
     #pdb.set_trace()
     if crop:
         crop_mask = gt[0] != gt[0]
         crop_mask = crop_mask[0,:,:]
-        crop_mask[45*_h:471*_h, 46*_w:601*_w] = 1    
+        crop_mask[sH(45):sH(471), sW(46):sW(601)] = 1    
     for sparse_gt, pred in zip(gt, pred):
         sparse_gt = sparse_gt[0,:,:]
         pred = pred[0,:,:]
@@ -116,7 +124,7 @@ def compute_errors_NYU(gt, pred, crop=True):
         pred_uncropped = torch.zeros((h, w), dtype=torch.float32).cuda()
         # #pred_uncropped[42+8:474-8, 40+16:616-16] = pred
 
-        pred_uncropped[(42+14)*_h:(474-2)*_h, (40+20)*_w:(616-12)*_w] = pred
+        pred_uncropped[sH(42+14):sH(474-2), sW(40+20):sW(616-12)] = pred
         # #pred_uncropped[49:466-1, 54:599-1] = pred
         # #pred_uncropped[42:474, 40:616] = pred
         # #pred_uncropped[42-18:474-18, 40-8:616-8] = pred
