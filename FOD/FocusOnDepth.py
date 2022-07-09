@@ -83,7 +83,7 @@ class FocusOnDepth(nn.Module):
             self.head_segmentation = HeadSeg(resample_dim, nclasses=nclasses)
 
     def transformer_forward(self, model, patches):
-        x = model.pos_embed(patches)
+        x = model._pos_embed(patches)
         
         if model.grad_checkpointing and not torch.jit.is_scripting():
             x = timm.models.helper.checkpoint_seq(model.blocks, x)
