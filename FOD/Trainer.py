@@ -6,7 +6,7 @@ import wandb
 import cv2
 import torch.nn as nn
 
-from logger import TermLogger, AverageMeter
+from logger import AverageMeter
 from tqdm import tqdm
 from os import replace
 from numpy.core.numeric import Inf
