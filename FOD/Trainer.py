@@ -124,6 +124,16 @@ class Trainer(object):
             for i, (X, Y_depths, Y_segmentations) in enumerate(pbar):
                 X, Y_depths, Y_segmentations = X.to(self.device), Y_depths.to(self.device), Y_segmentations.to(self.device)
                 output_depths, output_segmentations = self.model(X)
+                
+                # compute error NYU
+                if self.config['Dataset']['compute_errors_NYU']:
+                    print("compute_errors_NYU")
+                    err_result = compute_errors_NYU(gt=Y_depths, pred=output_depths, crop=True)
+                    errors.update(err_result)                                    
+
+                    if i % 50 == 0:
+                        print('valid: {}/{} Abs Error {:.4f} ({:.4f})'.format(i,length, errors.val[0], errors.avg[0]))
+                
                 output_depths = output_depths.squeeze(1) if output_depths != None else None
                 Y_depths = Y_depths.squeeze(1)
                 Y_segmentations = Y_segmentations.squeeze(1)
@@ -136,16 +146,7 @@ class Trainer(object):
                 # get loss
                 loss = self.loss_depth(output_depths, Y_depths) + self.loss_segmentation(output_segmentations, Y_segmentations)
                 val_loss += loss.item()
-                pbar.set_postfix({'validation_loss': val_loss/(i+1)}) 
-
-                # compute error NYU
-                if self.config['Dataset']['compute_errors_NYU']:
-                    print("compute_errors_NYU")
-                    err_result = compute_errors_NYU(gt=Y_depths, pred=output_depth, crop=True)
-                    errors.update(err_result)                                    
-
-                    # if i % 50 == 0:
-                    #     print('valid: {}/{} Abs Error {:.4f} ({:.4f})'.format(i,length, errors.val[0], errors.avg[0]))
+                pbar.set_postfix({'validation_loss': val_loss/(i+1)})                 
             
             if self.config['Dataset']['compute_errors_NYU']:                        
                 error_string = ', '.join('{} : {:.3f}'.format(name, error) for name, error in zip(error_names[0:len(error_names)], errors[0:len(errors)]))
