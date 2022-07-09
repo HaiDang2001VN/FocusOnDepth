@@ -8,3 +8,4 @@ torch
 torchvision
 tqdm
 wandb
+git+https://github.com/rwightman/pytorch-image-models
