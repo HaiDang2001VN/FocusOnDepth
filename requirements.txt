@@ -9,4 +9,3 @@ torch
 torchvision
 tqdm
 wandb
-logger
