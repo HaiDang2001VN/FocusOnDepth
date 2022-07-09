@@ -105,13 +105,15 @@ def compute_errors_NYU(gt, pred, crop=True):
     if crop:
         crop_mask = gt[0] != gt[0]
         crop_mask = crop_mask[0,:,:]
-        crop_mask[45:471, 46:601] = 1
+        crop_mask[45:471, 46:601] = 1    
     for sparse_gt, pred in zip(gt, pred):
         sparse_gt = sparse_gt[0,:,:]
         pred = pred[0,:,:]
         h,w = sparse_gt.shape
+        print(h,w,pred.shape)
         pred_uncropped = torch.zeros((h, w), dtype=torch.float32).cuda()
         #pred_uncropped[42+8:474-8, 40+16:616-16] = pred
+
         pred_uncropped[42+14:474-2, 40+20:616-12] = pred
         #pred_uncropped[49:466-1, 54:599-1] = pred
         #pred_uncropped[42:474, 40:616] = pred
