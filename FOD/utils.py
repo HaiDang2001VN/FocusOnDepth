@@ -99,25 +99,28 @@ def get_schedulers(optimizers):
 
 
 def compute_errors_NYU(gt, pred, crop=True):
+    SIZE = 384
+    _h = SIZE/480
+    _W = SIZE/640
     abs_diff, abs_rel, log10, a1, a2, a3,rmse_tot,rmse_log_tot = 0,0,0,0,0,0,0,0
     batch_size = gt.size(0)
     #pdb.set_trace()
     if crop:
         crop_mask = gt[0] != gt[0]
         crop_mask = crop_mask[0,:,:]
-        crop_mask[45:471, 46:601] = 1    
+        crop_mask[45*_h:471*_h, 46*_w:601*_w] = 1    
     for sparse_gt, pred in zip(gt, pred):
         sparse_gt = sparse_gt[0,:,:]
         pred = pred[0,:,:]
         h,w = sparse_gt.shape        
-        # pred_uncropped = torch.zeros((h, w), dtype=torch.float32).cuda()
+        pred_uncropped = torch.zeros((h, w), dtype=torch.float32).cuda()
         # #pred_uncropped[42+8:474-8, 40+16:616-16] = pred
 
-        # pred_uncropped[42+14:474-2, 40+20:616-12] = pred
+        pred_uncropped[(42+14)*_h:(474-2)*_h, (40+20)*_w:(616-12)*_w] = pred
         # #pred_uncropped[49:466-1, 54:599-1] = pred
         # #pred_uncropped[42:474, 40:616] = pred
         # #pred_uncropped[42-18:474-18, 40-8:616-8] = pred
-        # pred = pred_uncropped
+        pred = pred_uncropped
 
         valid = (sparse_gt < 10)&(sparse_gt > 1e-3)&(pred > 1e-3)
         if crop:

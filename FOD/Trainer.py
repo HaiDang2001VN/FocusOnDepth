@@ -128,7 +128,7 @@ class Trainer(object):
                 
                 # compute error NYU
                 if self.config['Dataset']['compute_errors_NYU']:                    
-                    err_result = compute_errors_NYU(gt=Y_depths, pred=output_depths, crop=False)
+                    err_result = compute_errors_NYU(gt=Y_depths, pred=output_depths, crop=True)
                     errors.update(err_result)                                    
 
                     # if i % 50 == 0:
