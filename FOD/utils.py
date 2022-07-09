@@ -122,14 +122,14 @@ def compute_errors_NYU(gt, pred, crop=True):
         sparse_gt = sparse_gt[0,:,:]
         pred = pred[0,:,:]
         h,w = sparse_gt.shape        
-        pred_uncropped = torch.zeros((480, 640), dtype=torch.float32).cuda()
+        # pred_uncropped = torch.zeros((480, 640), dtype=torch.float32).cuda()
         # #pred_uncropped[42+8:474-8, 40+16:616-16] = pred
 
-        pred_uncropped[sH(42+14):sH(474-2), sW(40+20):sW(616-12)] = pred
+        # pred_uncropped[sH(42+14):sH(474-2), sW(40+20):sW(616-12)] = pred
         # #pred_uncropped[49:466-1, 54:599-1] = pred
         # #pred_uncropped[42:474, 40:616] = pred
         # #pred_uncropped[42-18:474-18, 40-8:616-8] = pred
-        pred = pred_uncropped
+        # pred = pred_uncropped
 
         valid = (sparse_gt < 10)&(sparse_gt > 1e-3)&(pred > 1e-3)
         if crop:
