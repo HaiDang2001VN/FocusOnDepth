@@ -49,8 +49,8 @@ class AutoFocusDataset(Dataset):
         self.paths_segmentations = get_total_paths(path_segmentations, config['Dataset']['extensions']['ext_segmentations'])
 
         assert (self.split in ['train', 'test', 'val']), "Invalid split!"
-        assert (len(self.paths_images) == len(self.paths_depths)), "Different number of instances between the input and the depth maps"
-        assert (len(self.paths_images) == len(self.paths_segmentations)), "Different number of instances between the input and the segmentation maps"
+        assert (len(self.paths_images) == len(self.paths_depths)), f"Different number of instances between the input and the depth maps, {len(self.paths_images)} and {len(self.paths_depths)}"
+        assert (len(self.paths_images) == len(self.paths_segmentations)), f"Different number of instances between the input and the segmentation maps, {len(self.paths_images)} and {len(self.paths_segmentations)}"
         assert (config['Dataset']['splits']['split_train']+config['Dataset']['splits']['split_test']+config['Dataset']['splits']['split_val'] == 1), "Invalid splits (sum must be equal to 1)"
         # check for segmentation
 
