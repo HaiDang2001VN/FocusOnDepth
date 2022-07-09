@@ -140,6 +140,7 @@ class Trainer(object):
 
                 # compute error NYU
                 if self.config['Dataset']['compute_errors_NYU']:
+                    print("compute_errors_NYU")
                     err_result = compute_errors_NYU(gt=Y_depths, pred=output_depth, crop=True)
                     errors.update(err_result)                                    
 

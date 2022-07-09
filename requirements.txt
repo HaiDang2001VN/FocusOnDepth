@@ -4,7 +4,6 @@ numpy
 opencv_python
 Pillow
 scipy
-timm
 torch
 torchvision
 tqdm
