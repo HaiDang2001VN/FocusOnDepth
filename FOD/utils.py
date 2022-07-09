@@ -109,8 +109,7 @@ def compute_errors_NYU(gt, pred, crop=True):
     for sparse_gt, pred in zip(gt, pred):
         sparse_gt = sparse_gt[0,:,:]
         pred = pred[0,:,:]
-        h,w = sparse_gt.shape
-        print(h,w,pred.shape)
+        h,w = sparse_gt.shape        
         # pred_uncropped = torch.zeros((h, w), dtype=torch.float32).cuda()
         # #pred_uncropped[42+8:474-8, 40+16:616-16] = pred
 

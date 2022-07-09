@@ -110,6 +110,7 @@ class Trainer(object):
         """
         error_names = ['abs_diff', 'abs_rel', 'log10', 'a1', 'a2', 'a3','rmse','rmse_log']
         errors = AverageMeter(i=len(error_names))
+        length = len(val_loader)
         
         val_loss = 0.
         self.model.eval()
