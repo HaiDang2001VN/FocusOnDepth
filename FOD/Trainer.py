@@ -6,10 +6,11 @@ import wandb
 import cv2
 import torch.nn as nn
 
+from logger import TermLogger, AverageMeter
 from tqdm import tqdm
 from os import replace
 from numpy.core.numeric import Inf
-from FOD.utils import get_losses, get_optimizer, get_schedulers, create_dir
+from FOD.utils import get_losses, get_optimizer, get_schedulers, create_dir, compute_errors_NYU
 from FOD.FocusOnDepth import FocusOnDepth
 
 class Trainer(object):
@@ -85,7 +86,7 @@ class Trainer(object):
                         output_depths.min().item(), output_depths.max().item(),'\n',
                         loss.item(),
                     )
-                    exit(0)
+                    exit(0)            
 
                 if self.config['wandb']['enable'] and ((i % 50 == 0 and i>0) or i==len(train_dataloader)-1):
                     wandb.log({"loss": running_loss/(i+1)})
@@ -108,6 +109,9 @@ class Trainer(object):
             on wandb
             :- val_dataloader -: torch dataloader
         """
+        error_names = ['abs_diff', 'abs_rel', 'log10', 'a1', 'a2', 'a3','rmse','rmse_log']
+        errors = AverageMeter(i=len(error_names))
+        
         val_loss = 0.
         self.model.eval()
         X_1 = None
@@ -117,7 +121,7 @@ class Trainer(object):
         output_segmentations_1 = None
         with torch.no_grad():
             pbar = tqdm(val_dataloader)
-            pbar.set_description("Validation")
+            pbar.set_description("Validation")            
             for i, (X, Y_depths, Y_segmentations) in enumerate(pbar):
                 X, Y_depths, Y_segmentations = X.to(self.device), Y_depths.to(self.device), Y_segmentations.to(self.device)
                 output_depths, output_segmentations = self.model(X)
@@ -133,7 +137,19 @@ class Trainer(object):
                 # get loss
                 loss = self.loss_depth(output_depths, Y_depths) + self.loss_segmentation(output_segmentations, Y_segmentations)
                 val_loss += loss.item()
-                pbar.set_postfix({'validation_loss': val_loss/(i+1)})
+                pbar.set_postfix({'validation_loss': val_loss/(i+1)}) 
+
+                # compute error NYU
+                if self.config['Dataset']['compute_errors_NYU']:
+                    err_result = compute_errors_NYU(gt=Y_depths, pred=output_depth, crop=True)
+                    errors.update(err_result)                                    
+
+                    # if i % 50 == 0:
+                    #     print('valid: {}/{} Abs Error {:.4f} ({:.4f})'.format(i,length, errors.val[0], errors.avg[0]))
+            
+            if self.config['Dataset']['compute_errors_NYU']:                        
+                error_string = ', '.join('{} : {:.3f}'.format(name, error) for name, error in zip(error_names[0:len(error_names)], errors[0:len(errors)]))
+                print(' * Avg {}'.format(error_string))
             if self.config['wandb']['enable']:
                 wandb.log({"val_loss": val_loss/(i+1)})
                 self.img_logger(X_1, Y_depths_1, Y_segmentations_1, output_depths_1, output_segmentations_1)

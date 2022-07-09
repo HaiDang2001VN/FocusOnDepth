@@ -1,5 +1,6 @@
 import os, errno
 import numpy as np
+import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -95,3 +96,46 @@ def get_optimizer(config, net):
 
 def get_schedulers(optimizers):
     return [ReduceLROnPlateau(optimizer) for optimizer in optimizers]
+
+
+def compute_errors_NYU(gt, pred, crop=True):
+    abs_diff, abs_rel, log10, a1, a2, a3,rmse_tot,rmse_log_tot = 0,0,0,0,0,0,0,0
+    batch_size = gt.size(0)
+    #pdb.set_trace()
+    if crop:
+        crop_mask = gt[0] != gt[0]
+        crop_mask = crop_mask[0,:,:]
+        crop_mask[45:471, 46:601] = 1
+    for sparse_gt, pred in zip(gt, pred):
+        sparse_gt = sparse_gt[0,:,:]
+        pred = pred[0,:,:]
+        h,w = sparse_gt.shape
+        pred_uncropped = torch.zeros((h, w), dtype=torch.float32).cuda()
+        #pred_uncropped[42+8:474-8, 40+16:616-16] = pred
+        pred_uncropped[42+14:474-2, 40+20:616-12] = pred
+        #pred_uncropped[49:466-1, 54:599-1] = pred
+        #pred_uncropped[42:474, 40:616] = pred
+        #pred_uncropped[42-18:474-18, 40-8:616-8] = pred
+        pred = pred_uncropped
+
+        valid = (sparse_gt < 10)&(sparse_gt > 1e-3)&(pred > 1e-3)
+        if crop:
+            valid = valid & crop_mask
+        valid_gt = sparse_gt[valid].clamp(1e-3, 10)
+        valid_pred = pred[valid]
+        valid_pred = valid_pred.clamp(1e-3,10)
+
+        thresh = torch.max((valid_gt / valid_pred), (valid_pred / valid_gt))
+        a1 += (thresh < 1.25).float().mean()
+        a2 += (thresh < 1.25 ** 2).float().mean()
+        a3 += (thresh < 1.25 ** 3).float().mean()
+        rmse = (valid_gt - valid_pred) ** 2
+        rmse_tot += torch.sqrt(torch.mean(rmse))
+        rmse_log = (torch.log(valid_gt) - torch.log(valid_pred)) ** 2
+        rmse_log_tot += torch.sqrt(torch.mean(rmse_log))
+        abs_diff += torch.mean(torch.abs(valid_gt - valid_pred))
+        abs_rel += torch.mean(torch.abs(valid_gt - valid_pred) / valid_gt)
+
+        log10 += torch.mean(torch.abs(torch.log10(valid_gt)-torch.log10(valid_pred)))
+
+    return [metric.item() / batch_size for metric in [abs_diff, abs_rel, log10, a1, a2, a3,rmse_tot,rmse_log_tot]]
