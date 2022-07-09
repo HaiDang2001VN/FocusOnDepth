@@ -127,13 +127,12 @@ class Trainer(object):
                 output_depths, output_segmentations = self.model(X)
                 
                 # compute error NYU
-                if self.config['Dataset']['compute_errors_NYU']:
-                    print("compute_errors_NYU")
+                if self.config['Dataset']['compute_errors_NYU']:                    
                     err_result = compute_errors_NYU(gt=Y_depths, pred=output_depths, crop=False)
                     errors.update(err_result)                                    
 
-                    if i % 50 == 0:
-                        print('valid: {}/{} Abs Error {:.4f} ({:.4f})'.format(i,length, errors.val[0], errors.avg[0]))
+                    # if i % 50 == 0:
+                    #     print('valid: {}/{} Abs Error {:.4f} ({:.4f})'.format(i,length, errors.val[0], errors.avg[0]))
                 
                 output_depths = output_depths.squeeze(1) if output_depths != None else None
                 Y_depths = Y_depths.squeeze(1)
@@ -150,7 +149,7 @@ class Trainer(object):
                 pbar.set_postfix({'validation_loss': val_loss/(i+1)})                 
             
             if self.config['Dataset']['compute_errors_NYU']:                        
-                error_string = ', '.join('{} : {:.3f}'.format(name, error) for name, error in zip(error_names[0:len(error_names)], errors[0:len(errors)]))
+                error_string = ', '.join('{} : {:.3f}'.format(name, error) for name, error in zip(error_names[0:len(error_names)], errors.avg[0:len(errors.avg)]))
                 print(' * Avg {}'.format(error_string))
             if self.config['wandb']['enable']:
                 wandb.log({"val_loss": val_loss/(i+1)})
