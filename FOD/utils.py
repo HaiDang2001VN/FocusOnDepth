@@ -137,6 +137,7 @@ def compute_errors_NYU(gt, pred, crop=True):
         valid_gt = sparse_gt[valid].clamp(1e-3, 10)
         valid_pred = pred[valid]
         valid_pred = valid_pred.clamp(1e-3,10)
+        print(valid_pred.isnan().any())
 
         thresh = torch.max((valid_gt / valid_pred), (valid_pred / valid_gt))
         a1 += (thresh < 1.25).float().mean()
