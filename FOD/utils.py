@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+import math
 from glob import glob
 from PIL import Image
 from torchvision import transforms, utils
@@ -101,12 +102,12 @@ def sH(x):
     SIZE = 384
     _h = SIZE/480
     _w = SIZE/640
-    return np.floor(x * _h)
+    return math.floor(x * _h)
 def sW(x):
     SIZE = 384
     _h = SIZE/480
     _w = SIZE/640
-    return np.floor(x * _w)
+    return math.floor(x * _w)
 
 def compute_errors_NYU(gt, pred, crop=True):
     
