@@ -101,7 +101,7 @@ def get_schedulers(optimizers):
 def compute_errors_NYU(gt, pred, crop=True):
     SIZE = 384
     _h = SIZE/480
-    _W = SIZE/640
+    _w = SIZE/640
     abs_diff, abs_rel, log10, a1, a2, a3,rmse_tot,rmse_log_tot = 0,0,0,0,0,0,0,0
     batch_size = gt.size(0)
     #pdb.set_trace()
